@@ -1,6 +1,31 @@
 import sys
 import pprint
 
+
+DIODE_FOOTPRINT_PREFIX = "(footprint \"lifeclocc_keebs:LED"
+RESISTOR_FOOTPRINT_PREFIX = "(footprint \"lifeclocc_keebs:R"
+OFFSET = [0, 1.7]  # Offset for the resistor position
+
+"""
+Format of a footprint block:
+  (footprint "lifeclocc_keebs:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder_Side" (layer "F.Cu")
+    (tstamp 03b8e690-3fc0-47c7-9107-d89fcfb30565)
+    (at 135.31 123.175) # Position of the footprint
+    (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal with elongated pad for handsoldering. (Body size source: http://www.tortai-tech.com/upload/download/2011102023233369053.pdf), generated with kicad-footprint-generator")
+    .......
+    (fp_text reference "R1" (at 4.1656 0) (layer "F.SilkS") # Reference of the footprint
+        (effects (font (size 1 1) (thickness 0.15)))
+      (tstamp 8f13f99e-5e3c-48b5-888c-f99ce6ee5c27)
+    )
+    ........
+    (model "${KISYS3DMOD}/Resistor_SMD.3dshapes/R_0603_1608Metric.wrl"
+      (offset (xyz 0 0 0))
+      (scale (xyz 1 1 1))
+      (rotate (xyz 0 0 0))
+    )
+  ) # End of the footprint block
+"""
+
 def main():
  
   #  Diode value is of format:
@@ -26,8 +51,8 @@ def main():
       iterator = 0
       while iterator < total_lines:
         line = lines[iterator]
-        # if line starts with "(footprint \"lifeclocc_keebs:LED" then it is a diode
-        if line.strip().startswith("(footprint \"lifeclocc_keebs:LED"):
+        # if line starts with the diode footprint prefix, extract the reference and position
+        if line.strip().startswith(DIODE_FOOTPRINT_PREFIX):
           reference = ""
           positionX = 0
           positionY = 0
@@ -60,8 +85,11 @@ def main():
       iterator = 0
       while iterator < total_lines:
         line = lines[iterator]
-        if line.strip().startswith("(footprint \"lifeclocc_keebs:R"):
+        # if line starts with the resistor footprint prefix, extract the block and update the position
+        if line.strip().startswith(RESISTOR_FOOTPRINT_PREFIX):
           resistor_block = []
+
+          # Extract the resistor block and store it in a temporary variable
           while iterator < total_lines:
             resistor_block.append(lines[iterator])
             if lines[iterator].startswith("  )"):
@@ -84,8 +112,8 @@ def main():
           diode_reference = "D" + reference[1:]
           for diode in diode_values:
             if diode["reference"] == diode_reference:
-              positionX = diode["positionX"]
-              positionY = diode["positionY"] + 1.7  # Adjust the offset as needed
+              positionX = diode["positionX"] + OFFSET[0]
+              positionY = diode["positionY"] + OFFSET[1]
               break
 
           # Update the resistor block with new coordinates
