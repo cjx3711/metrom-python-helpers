@@ -16,6 +16,12 @@ In order for this to work, the LED references need to be D1, D2, D3, etc. and th
 
 This runs on python 3.12.0.
 
+The script has a few constants that can be modified to fit the specific design:
+
+- `DIODE_FOOTPRINT_PREFIX` - The prefix for the LED references
+- `RESISTOR_FOOTPRINT_PREFIX` - The prefix for the resistor references
+- `OFFSET` - The offset between the LED and resistor references
+
 To use this script, run the following command:
 
 ```bash
